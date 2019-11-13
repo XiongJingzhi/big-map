@@ -1,0 +1,78 @@
+.aside .notices {
+  width: 530px;
+  height: 185px;
+  overflow: hidden;
+  background: #f2f2f2;
+}
+
+.aside .notices .notice-container {
+  margin-top: 15px;
+}
+
+.aside .notices .notice-container span {
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+}
+
+.aside .notices .notice-container .notice-title {
+  width: 40px;
+}
+
+.aside .notices .notice-container .notice-value {
+  width: 460px;
+  text-align: right;
+}
+
+
+.aside .count {
+  margin-top: 25px;
+  width: 530px;
+  height: 90px;
+  overflow: hidden;
+  background: #f2f2f2;
+}
+
+.aside .count .count-item {
+  float: left;
+  margin-right: 25px;
+  width: 160px;
+  height: 90px;
+}
+
+.aside .count .count-item:last-child {
+  margin-right: 0;
+}
+
+.aside .count .count-item .count-value {
+  font-size: 28px;
+}
+
+.congestion {
+  margin-top: 35px;
+  height: 565px;
+  width: 530px;
+  overflow: hidden;
+  background: #f2f2f2;
+}
+
+.congestion table tr,
+th {
+  width: 176.67px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.congestion table thead tr th {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.congestion table tr {
+  height: 70px;
+}
+
+.congestion table tr td {
+  text-align: center;
+  vertical-align: middle;
+}

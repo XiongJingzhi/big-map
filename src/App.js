@@ -1,24 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
+import Main from './components/main'
+import Header from './components/header'
+import AsideSection from './components/aside'
 import './App.css';
 
 function App() {
+  function updateSize() {
+    const widthScale = window.innerWidth / 1920
+    const heightScale = window.innerHeight / 1080
+    console.log('widthScale', widthScale, heightScale)
+    document.body.style.transform = `scale(${widthScale}, ${heightScale})`
+  }
+  updateSize()
+  window.addEventListener('resize', updateSize)
+  
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header/>
+      <Main />
+      <AsideSection />
     </div>
   );
 }
