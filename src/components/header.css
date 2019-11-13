@@ -1,0 +1,12 @@
+.header-header {
+  height: 117px;
+  text-align: center;
+  background: url('../assets//bg-header.png') 100% / cover;
+}
+
+.header-header .header-title {
+  margin-top: 18px;
+  font-size: 40px;
+  font-weight: bold;
+  color: #7EFAFC;
+}

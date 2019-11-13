@@ -8,7 +8,6 @@ function App() {
   function updateSize() {
     const widthScale = window.innerWidth / 1920
     const heightScale = window.innerHeight / 1080
-    console.log('widthScale', widthScale, heightScale)
     document.body.style.transform = `scale(${widthScale}, ${heightScale})`
   }
   updateSize()

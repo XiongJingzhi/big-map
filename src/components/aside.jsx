@@ -139,8 +139,7 @@ const styles = {
   aside: {
     float: 'left',
     marginLeft: 30,
-    width: 530,
-    overflow: 'hidden'
+    width: 530
   }
 }
 

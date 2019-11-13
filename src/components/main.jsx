@@ -1,41 +1,102 @@
+/* eslint-disable no-undef */
 import React, { useState } from 'react';
 import './main.css'
+import MapNotice from '../assets/icon-map-notice.png'
 
 class Map extends React.Component {
   constructor(props) {
     super(props)
-    this.appendScript('maps', 'e3c5f0e5680290cd9e56a889b7babb01', '1.3.2', 'init')
+    this.appendScript()
     window.init = () => {
-      this.map = this.createMap()
+      this.createMap()
     }
   }
 
-  appendScript(type, key, version, event) {
-    if (document.querySelector(`#${type}`)) {
+  appendScript() {
+    if (document.querySelector('#amap')) {
       return
     }
     const body = document.getElementsByTagName('body')[0]
     const script = document.createElement('script')
-    script.src = `https://webapi.amap.com/${type}?key=${key}&v=${version}&callback=${event}`
-    script.setAttribute("id", type)
+    script.type = 'text/javascript'
+    script.charset = 'utf-8'
+    script.src = 
+      'https://webapi.amap.com/maps?v=1.4.15&key=e3c5f0e5680290cd9e56a889b7babb01&callback=init'
+    script.setAttribute("id", "amap")
     body.appendChild(script)
   }
 
   createMap() {
-    // eslint-disable-next-line no-undef
-    const map = new AMap.Map('map', {
-      mapStyle: 'amap://styles/normal',
-      zoom: 16,
-      resizeEnable: true,
-      center: [100.236577,26.870854]
-    })
-    document.querySelector('.amap-logo').remove()
-    return map
+    function initMap() {
+      const map = new AMap.Map('map', {
+        zoom: 18,
+        mapStyle: 'amap://styles/blue',
+        layers: [new AMap.TileLayer.RoadNet(), new AMap.TileLayer.Satellite()], 
+        resizeEnable: true,
+        center: [100.236577,26.870854],
+      })
+      map.setFeatures()
+      return map
+    }
+
+    function renderMarkers(map) {
+      const markers = [
+        {
+          geo: [100.235045,26.868957],
+          title: '玉带桥',
+          icon: MapNotice
+        },
+        {
+          geo: [100.234326,26.871397],
+          title: '网红街',
+          icon: MapNotice
+        },
+        {
+          geo: [100.238553,26.87089],
+          title: '雪山书院',
+          icon: MapNotice
+        },
+        {
+          geo: [100.233757,26.869263],
+          title: '万卷楼',
+          icon: MapNotice
+        }
+      ]
+      function generateMarkers(geo, title, icon) {
+        var marker = new AMap.Marker({
+          position: new AMap.LngLat(...geo),
+          offset: new AMap.Pixel(-10, -10),
+          icon: icon,
+          title: title
+        })
+        return marker
+      }
+      const markerList = markers.map(({geo, title, icon}, index) => generateMarkers(geo, title, icon))
+      map.add(markerList)
+    }
+
+    function renderWindow() {
+
+    }
+
+    function removeLogo() {
+      document.querySelector('.amap-logo').remove()
+    }
+
+    function renderMap() {
+      const map = initMap()
+      renderMarkers(map)
+      // removeLogo()
+    }
+
+    renderMap()
   }
 
   render() {
     return (
-      <div id="map" style={{width: '1280px', height: '623px'}}>正在加载</div>
+      <div className="map-container">
+        <div id="map" style={{width: '1272px', height: '617px'}}>正在加载</div>
+      </div>
     )
   }
 }
@@ -56,7 +117,7 @@ function Footer() {
   const [detail, setDetail] = useState(initDetail)
   const [images, setImages] = useState(initImages)
   return (
-    <footer style={styles.footer} className="footer">
+    <footer className="footer">
       <div className="left">
         <div className="top">
           <h5 className="title">设备信息</h5>
@@ -110,8 +171,9 @@ function Main() {
 const styles = {
   main: {
     float: 'left',
+    marginLeft: 40,
     width: 1280,
-    overflow: 'hidden'
+    color: '#ffffff'
   }
 }
 
