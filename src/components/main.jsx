@@ -1,5 +1,7 @@
 /* eslint-disable no-undef */
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import { transform, BD09, GCJ02 } from 'gcoord'
+import { getAllDevices, getDevice } from '../api/info'
 import './main.css'
 import MapNotice from '../assets/icon-map-notice.png'
 
@@ -8,7 +10,7 @@ class Map extends React.Component {
     super(props)
     this.appendScript()
     window.init = () => {
-      this.createMap()
+      this.createMap(props)
     }
   }
 
@@ -26,67 +28,82 @@ class Map extends React.Component {
     body.appendChild(script)
   }
 
-  createMap() {
-    function initMap() {
+  createMap(props) {
+    function initMap(center) {
+
       const map = new AMap.Map('map', {
         zoom: 18,
-        mapStyle: 'amap://styles/blue',
         layers: [new AMap.TileLayer.RoadNet(), new AMap.TileLayer.Satellite()], 
         resizeEnable: true,
-        center: [100.236577,26.870854],
+        center: center,
       })
-      map.setFeatures()
+      var canvas = document.createElement('canvas');
+      canvas.width = map.getSize().width;
+      canvas.height = map.getSize().height;
+      var context = canvas.getContext('2d')
+      context.fillStyle = 'rgba(13, 29, 61, 0.2)'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      var customLayer = new AMap.CanvasLayer({
+        canvas: canvas,
+        zIndex: 12,
+        zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
+      })
+      map.add(customLayer)
+      map.setFeatures('road')
       return map
     }
 
-    function renderMarkers(map) {
-      const markers = [
+    async function getMarkers() {
+      const {List} = await getAllDevices()
+      function transformGeo(geo) {
+        return transform(
+          geo,
+          BD09,
+          GCJ02
+        )
+      }
+      const markers = List.flat().map(item => (
         {
-          geo: [100.235045,26.868957],
-          title: '玉带桥',
-          icon: MapNotice
-        },
-        {
-          geo: [100.234326,26.871397],
-          title: '网红街',
-          icon: MapNotice
-        },
-        {
-          geo: [100.238553,26.87089],
-          title: '雪山书院',
-          icon: MapNotice
-        },
-        {
-          geo: [100.233757,26.869263],
-          title: '万卷楼',
-          icon: MapNotice
+          geo: transformGeo([item.Long, item.Lat]),
+          title: item.Addr,
+          icon: MapNotice,
+          id: item.No
         }
-      ]
-      function generateMarkers(geo, title, icon) {
+      ))
+      return markers
+    }
+
+    function renderMarkers(map, markers) {
+      function generateMarkers(geo, title, icon, id) {
         var marker = new AMap.Marker({
+          map: map,
           position: new AMap.LngLat(...geo),
-          offset: new AMap.Pixel(-10, -10),
           icon: icon,
+          clickable: true,
           title: title
+        })
+        marker.on('click', function(e) {
+          console.log('click')
+          props.getDetail(e, id)
         })
         return marker
       }
-      const markerList = markers.map(({geo, title, icon}, index) => generateMarkers(geo, title, icon))
-      map.add(markerList)
+
+      markers.forEach(({geo, title, icon, id}, index) => {
+        generateMarkers(geo, title, icon, id)
+      })
     }
 
-    function renderWindow() {
-
+    function renderWindow(map) {
+  
     }
 
-    function removeLogo() {
-      document.querySelector('.amap-logo').remove()
-    }
 
-    function renderMap() {
-      const map = initMap()
-      renderMarkers(map)
-      // removeLogo()
+    async function renderMap() {
+      const markers = await getMarkers()
+      const map = initMap(markers[0]['geo'])
+      renderMarkers(map, markers)
+      renderWindow(map)
     }
 
     renderMap()
@@ -95,26 +112,19 @@ class Map extends React.Component {
   render() {
     return (
       <div className="map-container">
-        <div id="map" style={{width: '1272px', height: '617px'}}>正在加载</div>
+        <div id="map" style={{width: '1272px', height: '617px'}}></div>
       </div>
     )
   }
 }
 
-function Footer() {
-  const initDetail = {
-    id: 12321321,
-    geo: '七一街',
-    status: '工作状态',
-    content: '疏松通知'
-  }
+function Footer({detail}) {
   const initImages = [
     'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg',
     'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg',
     'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg'
   ]
   const [name, setName] = useState('S123')
-  const [detail, setDetail] = useState(initDetail)
   const [images, setImages] = useState(initImages)
   return (
     <footer className="footer">
@@ -139,7 +149,7 @@ function Footer() {
         <div className="group-container">
           <div className="item">
             <span className="title">设备编号</span>
-            <span className="value">{detail.id}</span>
+            <span className="value">{detail.no}</span>
           </div>
           <div className="item">
             <span className="title">工作状态</span>
@@ -147,7 +157,7 @@ function Footer() {
           </div>
           <div className="item">
             <span className="title">设备点位地理信息</span>
-            <span className="value">{detail.geo}</span>
+            <span className="value">{detail.address}</span>
           </div>
           <div className="item">
             <span className="title">正在播放内容</span>
@@ -160,21 +170,28 @@ function Footer() {
 }
 
 function Main() {
+  const [detail, setDetail] = useState({})
+  
+  async function detailHandler(e, id){
+    const {No, Play, Vol, IsConn, Addr, Enable} = await getDevice(id)
+    setDetail({
+      no: No,
+      address: Addr.slice(5),
+      content: Play,
+      status: !IsConn
+                ? '未连接'
+                : Enable
+                  ? '已启用'
+                  : '未启用',
+      volumn: Vol
+    })
+  }
   return (
-    <main style={styles.main}>
-      <Map />
-      <Footer />
+    <main className='main-main'>
+      <Map getDetail={detailHandler} />
+      <Footer detail={detail} />
     </main>
   )
-}
-
-const styles = {
-  main: {
-    float: 'left',
-    marginLeft: 40,
-    width: 1280,
-    color: '#ffffff'
-  }
 }
 
 export default Main;

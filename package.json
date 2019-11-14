@@ -2,7 +2,10 @@
   "name": "big-screen",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://120.76.189.124:11450/",
   "dependencies": {
+    "axios": "^0.19.0",
+    "gcoord": "^0.2.3",
     "normalize.css": "^8.0.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",

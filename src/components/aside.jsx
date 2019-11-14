@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { ToggleConsumer } from './content'
 import './aside.css'
 
 function Notice() {
@@ -33,32 +34,20 @@ function Notice() {
 }
 
 function Count() {
-  const initCounts = [
-    {
-      title: '广播数量',
-      value: '600'
-    },
-    {
-      title: '景区人数预估',
-      value: '318370'
-    },
-    {
-      title: '故障率',
-      value: '20%'
-    }
-  ]
-  const [counts, setCounts] = useState(initCounts)
-
   return (
     <section className="count">
-      {
-        counts.map((item, i) => (
-          <div key={'notice' + i} className="count-item">
-            <div className="count-title">{item.title}</div>
-            <div className="count-value">{item.value}</div>
-          </div>
-        ))
-      }
+      <ToggleConsumer>
+        {
+          ({counts}) => (
+            counts.map((item, i) => (
+              <div key={'notice' + i} className="count-item">
+                <div className="count-title">{item.title}</div>
+                <div className="count-value">{item.value}</div>
+              </div>
+            ))
+          )
+        }
+      </ToggleConsumer>
     </section>
   )
 }
