@@ -17,7 +17,7 @@
 }
 
 .aside .notices .notice-container {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 .aside .notices .notice-container span {
@@ -63,13 +63,27 @@
 }
 
 .aside .count .count-item .count-value {
-  margin-top: 5px;
+  margin-top: 12px;
   color: #00F1FF;
   font-size: 32px;
 }
 
 .aside .count .count-item:last-child .count-value {
+  position: relative;
+  display: inline-block;
+  padding: 0 10px;
   color: #FF0000;
+}
+
+.aside .count .count-item:last-child .count-value::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  filter: blur(4px);
+  background: rgba(255, 0, 0, 0.25);
 }
 
 .congestion {

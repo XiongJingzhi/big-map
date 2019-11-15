@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useState } from 'react'
 import { transform, BD09, GCJ02 } from 'gcoord'
-import { getAllDevices, getDevice } from '../api/info'
+import { getAllDevices, getDevice, getDeviceSearch } from '../api/info'
 import './main.css'
 import MapNotice from '../assets/icon-map-notice.png'
 
@@ -23,33 +23,50 @@ class Map extends React.Component {
     script.type = 'text/javascript'
     script.charset = 'utf-8'
     script.src = 
-      'https://webapi.amap.com/maps?v=1.4.15&key=e3c5f0e5680290cd9e56a889b7babb01&callback=init'
+      'https://webapi.amap.com/maps?v=1.4.15&key=e3c5f0e5680290cd9e56a889b7babb01&callback=init&plugin=AMap.DistrictSearch'
     script.setAttribute("id", "amap")
     body.appendChild(script)
   }
 
   createMap(props) {
     function initMap(center) {
-
       const map = new AMap.Map('map', {
         zoom: 18,
         layers: [new AMap.TileLayer.RoadNet(), new AMap.TileLayer.Satellite()], 
         resizeEnable: true,
         center: center,
       })
-      var canvas = document.createElement('canvas');
-      canvas.width = map.getSize().width;
-      canvas.height = map.getSize().height;
-      var context = canvas.getContext('2d')
-      context.fillStyle = 'rgba(13, 29, 61, 0.2)'
-      context.fillRect(0, 0, canvas.width, canvas.height)
-      var customLayer = new AMap.CanvasLayer({
-        canvas: canvas,
-        zIndex: 12,
-        zooms: [3, 18] // 设置可见级别，[最小级别，最大级别]
-      })
-      map.add(customLayer)
       map.setFeatures('road')
+      AMap.plugin(["AMap.ControlBar"], function () {
+        var bar = new AMap.ControlBar()
+        map.addControl(bar)
+      })
+
+      // 添加丽江背景
+      var opts = {
+        subdistrict: 0,
+        extensions: 'all',
+        level: 'district'
+      }
+      var district = new AMap.DistrictSearch(opts)
+      district.search('丽江', function(status, result) {
+        var polygons = []
+        var bounds = result.districtList[0].boundaries;
+        if (bounds) {
+          for (var i = 0, l = bounds.length; i < l; i++) {
+            //生成行政区划polygon
+            var polygon = new AMap.Polygon({
+              strokeWeight: 1,
+              path: bounds[i],
+              fillOpacity: 0.4,
+              fillColor: '#80d8ff',
+              strokeColor: '#0091ea'
+            })
+            polygons.push(polygon);
+          }
+        }
+        map.add(polygons)
+      })
       return map
     }
 
@@ -83,7 +100,7 @@ class Map extends React.Component {
           title: title
         })
         marker.on('click', function(e) {
-          console.log('click')
+          renderWindow(map, title.slice(8), new AMap.LngLat(...geo))
           props.getDetail(e, id)
         })
         return marker
@@ -94,8 +111,15 @@ class Map extends React.Component {
       })
     }
 
-    function renderWindow(map) {
-  
+    function renderWindow(map, address, position) {
+      const element = `
+        <div class="custom-info">${address}</div>
+      `
+      var infoWindow = new AMap.InfoWindow({
+        content: element,
+        offset: new AMap.Pixel(20, -30)
+      })
+      infoWindow.open(map, position)
     }
 
 
@@ -103,7 +127,6 @@ class Map extends React.Component {
       const markers = await getMarkers()
       const map = initMap(markers[0]['geo'])
       renderMarkers(map, markers)
-      renderWindow(map)
     }
 
     renderMap()
@@ -118,23 +141,30 @@ class Map extends React.Component {
   }
 }
 
-function Footer({detail}) {
+function Footer({detail, searchDetail, searchList, selectSearch, qeury}) {
   const initImages = [
-    'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg',
-    'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg',
-    'http://cdn.bgwiki.cn//mch/20190806155101fjabTesNHPenrGXw.jpg'
+    require('../assets/device01.png'),
+    require('../assets/device02.png'),
+    require('../assets/device03.png')
   ]
-  const [name, setName] = useState('S123')
-  const [images, setImages] = useState(initImages)
+  const iconNotice = require("../assets/icon-notice.png")
+  const [images] = useState(initImages)
+  const volumnValue = {
+    height: detail.volumn
+  }
   return (
     <footer className="footer">
       <div className="left">
         <div className="top">
           <h5 className="title">设备信息</h5>
           <div className="search-input">
-            <span>{name}</span>
-            <input type="text" placeholder="模糊查询"/>
-          </div> 
+            <input type="text" placeholder="模糊查询" onChange={searchDetail} value={qeury}/>
+            <ul className="search-box">
+              {
+                searchList && searchList.map(item => <li key={item.No} className="search-item" onClick={(e) => selectSearch(e, item)}>{item.No}</li>)
+              }
+            </ul>
+          </div>
         </div>
         <div className="image-container">
           {
@@ -145,7 +175,10 @@ function Footer({detail}) {
         </div>
       </div>
       <div className="group">
-        <div className="group-title">所属分组</div>
+        <div className="group-title">
+          <div className="group-name">—所属分组—</div>
+          <div className="grop-vlaue">{detail.grpName}</div>
+        </div>
         <div className="group-container">
           <div className="item">
             <span className="title">设备编号</span>
@@ -164,6 +197,13 @@ function Footer({detail}) {
             <span className="value">{detail.content}</span>
           </div>
         </div>
+        <div className="volumn">
+          <img src={iconNotice} alt="音响" />
+          <div className="volumn-container">
+            <div className="volumn-value" style={volumnValue}></div>
+          </div>
+        <div className="volumn-num">{detail.volumn}</div>
+        </div>
       </div>
     </footer>
   )
@@ -171,25 +211,43 @@ function Footer({detail}) {
 
 function Main() {
   const [detail, setDetail] = useState({})
-  
+  const [searchList, setSearchList] = useState([])
+
   async function detailHandler(e, id){
-    const {No, Play, Vol, IsConn, Addr, Enable} = await getDevice(id)
+    const {No, Play, Vol, IsConn, Addr, Enable, GrpName} = await getDevice(id)
     setDetail({
       no: No,
       address: Addr.slice(5),
-      content: Play,
+      content: Play.slice(0, -4),
       status: !IsConn
                 ? '未连接'
                 : Enable
                   ? '已启用'
                   : '未启用',
-      volumn: Vol
+      volumn: Vol,
+      grpName: GrpName
     })
   }
+
+  async function searchDetail(event) {
+    const value = event.target.value
+    const result = await getDeviceSearch(value)
+    console.log('result', result, result.length)
+    
+    if (result.length > 0) {
+      setSearchList(result)
+    }
+  }
+
+  function selectSearch(e, item) {
+    setSearchList([])
+    setDetail(item)
+  }
+
   return (
     <main className='main-main'>
       <Map getDetail={detailHandler} />
-      <Footer detail={detail} />
+      <Footer detail={detail} searchList={searchList} searchDetail={searchDetail} selectSearch={selectSearch} />
     </main>
   )
 }

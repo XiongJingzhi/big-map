@@ -35,3 +35,12 @@ export function getDevice(no) {
   })
 }
 
+export function getDeviceSearch(query) {
+  return requset({
+    method: 'get',
+    url: '/QueryDevs',
+    params: {
+      qy: query
+    }
+  })
+}

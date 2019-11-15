@@ -57,32 +57,32 @@ function Congestion() {
     {
       title: '四方街',
       value: '16',
-      status: '疏散'
+      status: '正常'
     },
     {
       title: '酒吧街',
       value: '40',
-      status: '疏散中'
+      status: '正常'
     },
     {
       title: '东大街',
       value: '16',
-      status: '疏散'
+      status: '正常'
     },
     {
       title: '现文街',
       value: '26',
-      status: '疏散'
+      status: '正常'
     },
     {
       title: '七一街',
       value: '16',
-      status: '疏散'
+      status: '正常'
     },
     {
       title: '五一街',
       value: '16',
-      status: '疏散'
+      status: '正常'
     }
   ]
   const [counts, setCounts] = useState(initCounts)

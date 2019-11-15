@@ -53,28 +53,47 @@
 }
 
 .footer .left .search-input {
+  position: relative;
   display: inline-block;
   margin: 0 0 0 15px;
   transform: translateY(5px);
   border-radius: 10px;
-  border: 1px solid #ffffff;
-  width: 348px;
-  height: 33px;
-}
-
-.search-input span {
-  display: inline-block;
-  width: 67px;
-  text-align: center;
-  line-height: 33px;
+  width: 349px;
+  height: 35px;
+  background: url("../assets//bg-search.png") 100% / cover;
 }
 
 .search-input input {
   display: inline-block;
-  width: 280px;
-  line-height: 33px;
+  padding: 0 20px;
+  width: 330px;
+  line-height: 35px;
   color: #ffffff;
   background: transparent;
+}
+
+.footer .left .search-input ul {
+  position: absolute;
+  top: 35px;
+  left: 10px;
+  right: 10px;
+  height: 120px;
+  overflow: auto;
+  background: #163080;
+  list-style: none;
+}
+
+.footer .left .search-input ul li {
+  height: 30px;
+  line-height: 30px;
+}
+
+.footer .left .search-input ul li:hover {
+  background: gray;
+}
+
+.search-input input:focus {
+  outline: 0;
 }
 
 .footer .left .image-container {
@@ -89,6 +108,7 @@
 }
 
 .footer .group {
+  position: relative;
   float: left;
   margin-left: 40px;
 }
@@ -98,7 +118,17 @@
   font-size: 18px;
 }
 
+.group .group-title div {
+  display: inline-block;
+}
+
+.group .group-title .grop-vlaue {
+  margin-left: 20px;
+  font-size: 16px;
+}
+
 .group .group-container {
+  position: relative;
   margin-top: 20px;
   width: 620px;
   overflow: hidden;
@@ -106,7 +136,7 @@
 
 .group .group-container .item {
   float: left;
-  width: 310px;
+  width: 295px;
   font-size: 18px;
   line-height: 40px;
 }
@@ -115,10 +145,55 @@
   display: inline-block;
 }
 
-.group-container .item .value {
+.group .group-container .item .value {
   margin-left: 20px;
+  font-size: 16px;
 }
 
-.group-container .item .value {
-  font-size: 16px;
+.group .volumn {
+  position: absolute;
+  top: 33px;
+  right: 15px;
+}
+
+.group .volumn .volumn-container {
+  position: relative;
+  margin: 5px 0 0 6px;
+  height: 100px;
+  width: 6px;
+  border-radius: 3px;
+  background: #1E00FB;
+}
+
+.group .volumn .volumn-value {
+  position: absolute;
+  bottom: 0;
+  width: 6px;
+  border-radius: 3px;
+  background: #60A7FF;
+}
+
+.group .volumn .volumn-num {
+  margin: 7px 0 0 1px;
+  font-size: 14px;
+}
+
+.amap-info-content {
+  width: 200px;
+  border-radius: 10px;
+  border: 2px solid #2773E6;
+  background: #0D1D4D;
+  text-align: center;
+}
+
+.bottom-center .amap-info-sharp {
+  margin-left: -16px;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-top: 16px solid #0D1D4D;
+}
+
+.amap-info-content .custom-info {
+  color: #5EDCFF;
+  font-size: 27px;
 }

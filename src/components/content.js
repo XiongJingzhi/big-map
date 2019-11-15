@@ -10,11 +10,11 @@ const getCount = async () => {
     },
     {
       title: '景区人数预估',
-      value: '318370'
+      value: 964 + Number((Math.random() * 100000).toFixed(0))
     },
     {
       title: '故障率',
-      value: (res.DisCount / res.AllCount).toFixed(2) * 100 + '%'
+      value: (res.DisCount / res.AllCount * 100).toFixed(2) + '%'
     }
   ])
 }
@@ -27,15 +27,15 @@ export class ToggleProvider extends React.Component {
     counts: [
       {
         title: '广播数量',
-        value: 600
+        value: 0
       },
       {
         title: '景区人数预估',
-        value: '318370'
+        value: '108370'
       },
       {
         title: '故障率',
-        value: '20%'
+        value: '0'
       }
     ],
     allDevices: []
@@ -48,7 +48,7 @@ export class ToggleProvider extends React.Component {
 
   }
 
-  init = async() => {
+  init = async () => {
     let [counts] = await Promise.all([getCount()])
     this.setState({
       counts: counts
