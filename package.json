@@ -6,15 +6,13 @@
   "dependencies": {
     "axios": "^0.19.0",
     "gcoord": "^0.2.3",
-    "lodash": "^4.17.15",
-    "normalize.css": "^8.0.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-scripts": "3.2.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && scp -r ./build/* root@118.25.57.76:/var/www/big-screen/dist",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

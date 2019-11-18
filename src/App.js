@@ -4,7 +4,6 @@ import Main from './components/main'
 import Header from './components/header'
 import AsideSection from './components/aside'
 import './App.css'
-import 'normalize.css'
 
 function App() {
   return (

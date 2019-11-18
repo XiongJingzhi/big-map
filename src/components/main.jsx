@@ -58,8 +58,8 @@ class Map extends React.Component {
             var polygon = new AMap.Polygon({
               strokeWeight: 1,
               path: bounds[i],
-              fillOpacity: 0.4,
-              fillColor: '#80d8ff',
+              fillOpacity: 0.5,
+              fillColor: '#2C4F6B',
               strokeColor: '#0091ea'
             })
             polygons.push(polygon);
@@ -141,7 +141,7 @@ class Map extends React.Component {
   }
 }
 
-function Footer({detail, searchDetail, searchList, selectSearch, qeury}) {
+function Footer({detail, searchDetail, searchList, selectSearch}) {
   const initImages = [
     require('../assets/device01.png'),
     require('../assets/device02.png'),
@@ -149,8 +149,17 @@ function Footer({detail, searchDetail, searchList, selectSearch, qeury}) {
   ]
   const iconNotice = require("../assets/icon-notice.png")
   const [images] = useState(initImages)
+  const [value, setValue] = useState('')
   const volumnValue = {
     height: detail.volumn
+  }
+  const handlerChange = (e) => {
+    setValue(e.target.value)
+    searchDetail(e)
+  }
+  const handlerSelect = (e, item) => {
+    selectSearch(e, item)
+    setValue('')
   }
   return (
     <footer className="footer">
@@ -158,12 +167,17 @@ function Footer({detail, searchDetail, searchList, selectSearch, qeury}) {
         <div className="top">
           <h5 className="title">设备信息</h5>
           <div className="search-input">
-            <input type="text" placeholder="模糊查询" onChange={searchDetail} value={qeury}/>
-            <ul className="search-box">
+            <input type="text" placeholder="模糊查询" value={value} onChange={handlerChange} />
               {
-                searchList && searchList.map(item => <li key={item.No} className="search-item" onClick={(e) => selectSearch(e, item)}>{item.No}</li>)
+                searchList.length > 0 && (
+                  <ul className="search-box">
+                    {
+                      searchList.map(item => <li key={item.No} className="search-item" onClick={(e) => handlerSelect(e, item)}>{item.No}</li>)
+                    }
+                  </ul>
+                )
               }
-            </ul>
+            
           </div>
         </div>
         <div className="image-container">
@@ -189,11 +203,11 @@ function Footer({detail, searchDetail, searchList, selectSearch, qeury}) {
             <span className="value">{detail.status}</span>
           </div>
           <div className="item">
-            <span className="title">设备点位地理信息</span>
+            <span className="title">设备位置</span>
             <span className="value">{detail.address}</span>
           </div>
           <div className="item">
-            <span className="title">正在播放内容</span>
+            <span className="title">正在播放</span>
             <span className="value">{detail.content}</span>
           </div>
         </div>
@@ -213,9 +227,9 @@ function Main() {
   const [detail, setDetail] = useState({})
   const [searchList, setSearchList] = useState([])
 
-  async function detailHandler(e, id){
-    const {No, Play, Vol, IsConn, Addr, Enable, GrpName} = await getDevice(id)
-    setDetail({
+  function praseDevice(device) {
+    const {No, Play, Vol, IsConn, Addr, Enable, GrpName} = device
+    return {
       no: No,
       address: Addr.slice(5),
       content: Play.slice(0, -4),
@@ -226,22 +240,23 @@ function Main() {
                   : '未启用',
       volumn: Vol,
       grpName: GrpName
-    })
+    }
+  }
+
+  async function detailHandler(e, id){
+    const device = await getDevice(id)
+    setDetail(praseDevice(device))
   }
 
   async function searchDetail(event) {
     const value = event.target.value
     const result = await getDeviceSearch(value)
-    console.log('result', result, result.length)
-    
-    if (result.length > 0) {
-      setSearchList(result)
-    }
+    setSearchList(result)
   }
 
   function selectSearch(e, item) {
     setSearchList([])
-    setDetail(item)
+    setDetail(praseDevice(item))
   }
 
   return (

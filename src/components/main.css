@@ -136,7 +136,7 @@
 
 .group .group-container .item {
   float: left;
-  width: 295px;
+  width: 310px;
   font-size: 18px;
   line-height: 40px;
 }
@@ -146,7 +146,7 @@
 }
 
 .group .group-container .item .value {
-  margin-left: 20px;
+  margin-left: 10px;
   font-size: 16px;
 }
 
@@ -154,6 +154,9 @@
   position: absolute;
   top: 33px;
   right: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .group .volumn .volumn-container {
@@ -174,7 +177,8 @@
 }
 
 .group .volumn .volumn-num {
-  margin: 7px 0 0 1px;
+  margin-top: 7px;
+  text-align: center;
   font-size: 14px;
 }
 
