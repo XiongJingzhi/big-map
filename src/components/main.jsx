@@ -1,18 +1,21 @@
 /* eslint-disable no-undef */
 import React, { useState } from 'react'
+import { isEqual, differenceWith, remove } from 'lodash'
 import { transform, BD09, GCJ02 } from 'gcoord'
 import { ToggleConsumer } from './content'
-import { getAllDevices, getDevice, getDeviceSearch } from '../api/info'
+import { getDevice, getDeviceSearch } from '../api/info'
 import './main.css'
 import MapNotice from '../assets/icon-map-notice.png'
+import MapNotice1 from '../assets/icon-map-notice1.png'
+import MapNotice2 from '../assets/icon-map-notice2.png'
 
 class Map extends React.Component {
   constructor(props) {
     super(props)
     this.appendScript()
-    this.map = ''
+    this.markers = []
     window.init = () => {
-      this.map = this.createMap(props)
+      window.map = this.createMap(props)
     }
   }
 
@@ -68,76 +71,102 @@ class Map extends React.Component {
     return map
   }
 
-   
+  componentDidUpdate(preProps) {
+    try {
 
-
-    // function renderMap() {
-    //   const markers = getMarkers()
-    //   const map = initMap()
-    //   renderMarkers(map, markers)
-    // }
-
-    // renderMap()
-  
-    componentWillReceiveProps(props) {
-    
-    function getMarkers() {
-      function transformGeo(geo) {
-        return transform(
-          geo,
-          BD09,
-          GCJ02
-        )
+      if (!window.map || isEqual(preProps.devices, this.props.devices)) return
+      
+      const clearMarkers = (map, markers) => {
+        markers.forEach(i => map.remove(i))
       }
-      const devices = props.devices
 
-      const markers = devices.map(item => (
-        {
-          geo: transformGeo([item.Long, item.Lat]),
-          title: item.Addr,
-          icon: MapNotice,
-          id: item.No
+      function getMarkers(devices) {
+        function transformGeo(geo) {
+          return transform(
+            geo,
+            BD09,
+            GCJ02
+          )
         }
-      ))
-      return markers
-    }
 
-    function renderMarkers(map, markers) {
-      function generateMarkers(geo, title, icon, id) {
-        var marker = new AMap.Marker({
-          map: map,
-          position: new AMap.LngLat(...geo),
-          icon: icon,
-          clickable: true,
-          title: title
+        const markers = devices.map(item => (
+          {
+            geo: transformGeo([item.Long, item.Lat]),
+            title: item.Addr,
+            icon: !item.IsConn
+                    ? MapNotice2
+                    : item.Play
+                      ? MapNotice
+                      : MapNotice1,
+            type: !item.IsConn
+                    ? 'offline'
+                    : item.Play
+                      ? 'playing'
+                      : 'normol',
+            id: item.No,
+          }
+        ))
+        return markers
+      }
+      function template(type, icon) {
+        return `
+          <div class="custom-content-marker custom-${type}">
+            <img src="${icon}" alt="广播" srcset=""/>
+          </div>
+        `
+      }
+      function renderMarkers(map, markers, callback, close) {
+        function generateMarkers(geo, title, type, icon, id) {
+          var marker = new AMap.Marker({
+            map: map,
+            position: new AMap.LngLat(...geo),
+            icon: icon,
+            content: template(type, icon),
+            clickable: true,
+            title: title,
+            extData: {No: id}
+          })
+          marker.on('click', function(e) {
+            renderWindow(map, title.slice(8), new AMap.LngLat(...geo), close)
+            callback(e, id)
+          })
+          return marker
+        }
+
+        return markers.map(({geo, title, type, icon, id}, index) => {
+          return generateMarkers(geo, title, type, icon, id)
         })
-        marker.on('click', function(e) {
-          renderWindow(map, title.slice(8), new AMap.LngLat(...geo))
-          props.getDetail(e, id)
-        })
-        return marker
       }
 
-      markers.forEach(({geo, title, icon, id}, index) => {
-        generateMarkers(geo, title, icon, id)
-      })
-    }
+      function renderWindow(map, address, position, close) {
+        const element = `
+          <div class="custom-info">${address}</div>
+        `
+        var infoWindow = new AMap.InfoWindow({
+          content: element,
+          offset: new AMap.Pixel(20, -30)
+        })
+        infoWindow.open(map, position)
+        infoWindow.on('close', function(e) {
+          close()
+        })
+      }
+      const change = differenceWith(this.props.devices, preProps.devices, isEqual)
+      const changeNo = change.map(item => item.No)
+      clearMarkers(window.map, this.markers.filter(item => changeNo.includes(item.No)))
+      if (this.markers.length > 0) {
+        remove(this.markers, item => {
+          return changeNo.includes(item['B']['extData']['No'])
+        })
+      }
+      const markers = getMarkers(change)
+      const changeMarkers = renderMarkers(window.map, markers, this.props.getDetail, this.props.closeShow)
+      this.markers = this.markers.concat(changeMarkers)
+      console.log(this.markers)
 
-    function renderWindow(map, address, position) {
-      const element = `
-        <div class="custom-info">${address}</div>
-      `
-      var infoWindow = new AMap.InfoWindow({
-        content: element,
-        offset: new AMap.Pixel(20, -30)
-      })
-      infoWindow.open(map, position)
-      infoWindow.on('close', function(e) {
-        props.closeShow()
-      })
+    } catch (err) {
+      console.log('err', err)
     }
-    const markers = getMarkers()
-    renderMarkers(this.map, markers)
   }
   render() {
     return (

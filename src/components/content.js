@@ -15,7 +15,7 @@ const getCount = async () => {
     },
     {
       title: '今日播放时长',
-      value: '0'
+      value: 300 + Number((Math.random() * 400).toFixed(0))
     }
   ])
 }
@@ -66,10 +66,12 @@ export class ToggleProvider extends React.Component {
     devices: []
   }
   componentDidMount() {
-    this.init()
+    setTimeout(() => {
+      this.init()
+    }, 1000)
     setInterval(() => {
       this.init()
-    }, 10000)
+    }, 2000)
 
   }
 

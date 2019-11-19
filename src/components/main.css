@@ -1,9 +1,6 @@
 #map {
-  line-height: 617px;
-  font-size: 28px;
   overflow: hidden;
   text-align: center;
-  transform-origin: center;
 }
 
 .main-main {
@@ -22,14 +19,27 @@
   background: url('../assets/bg-map.png') 100% / cover;
 }
 
-.amap-container .amap-icon {
+.amap-marker-content {
+  white-space: normal !important;
+}
+
+.custom-content-marker {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.custom-content-marker img {
   position: relative;
   width: 35px;
   height: 35px;
   border-radius: 50%;
 }
 
-.amap-container .amap-icon::before {
+.custom-playing::before {
   content: '';
   position: absolute;
   top: 0;
