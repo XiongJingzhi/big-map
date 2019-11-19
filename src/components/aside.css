@@ -1,3 +1,10 @@
+.aside {
+  position: absolute;
+  top: 145px;
+  right: 40px;
+  width: 530px
+}
+
 .aside .notices {
   padding: 7px 30px;
   width: 473px;
@@ -63,7 +70,7 @@
 }
 
 .aside .count .count-item .count-value {
-  margin-top: 12px;
+  margin-top: 8px;
   color: #00F1FF;
   font-size: 32px;
 }
@@ -75,7 +82,7 @@
   color: #FF0000;
 }
 
-.aside .count .count-item:last-child .count-value::before {
+/* .aside .count .count-item:last-child .count-value::before {
   content: '';
   position: absolute;
   top: 0;
@@ -84,7 +91,7 @@
   left: 0;
   filter: blur(4px);
   background: rgba(255, 0, 0, 0.25);
-}
+} */
 
 .congestion {
   margin-top: 35px;

@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 import React, { useState } from 'react'
 import { transform, BD09, GCJ02 } from 'gcoord'
+import { ToggleConsumer } from './content'
 import { getAllDevices, getDevice, getDeviceSearch } from '../api/info'
 import './main.css'
 import MapNotice from '../assets/icon-map-notice.png'
@@ -9,8 +10,9 @@ class Map extends React.Component {
   constructor(props) {
     super(props)
     this.appendScript()
+    this.map = ''
     window.init = () => {
-      this.createMap(props)
+      this.map = this.createMap(props)
     }
   }
 
@@ -29,49 +31,57 @@ class Map extends React.Component {
   }
 
   createMap(props) {
-    function initMap(center) {
-      const map = new AMap.Map('map', {
-        zoom: 18,
-        layers: [new AMap.TileLayer.RoadNet(), new AMap.TileLayer.Satellite()], 
-        resizeEnable: true,
-        center: center,
-      })
-      map.setFeatures('road')
-      AMap.plugin(["AMap.ControlBar"], function () {
-        var bar = new AMap.ControlBar()
-        map.addControl(bar)
-      })
+    const map = new AMap.Map('map', {
+      zoom: 18,
+      layers: [new AMap.TileLayer.RoadNet(), new AMap.TileLayer.Satellite()], 
+      resizeEnable: true,
+      center: [100.23390439268934, 26.872131268529927],
+    })
+    map.setFeatures('road')
 
-      // 添加丽江背景
-      var opts = {
-        subdistrict: 0,
-        extensions: 'all',
-        level: 'district'
-      }
-      var district = new AMap.DistrictSearch(opts)
-      district.search('丽江', function(status, result) {
-        var polygons = []
-        var bounds = result.districtList[0].boundaries;
-        if (bounds) {
-          for (var i = 0, l = bounds.length; i < l; i++) {
-            //生成行政区划polygon
-            var polygon = new AMap.Polygon({
-              strokeWeight: 1,
-              path: bounds[i],
-              fillOpacity: 0.5,
-              fillColor: '#2C4F6B',
-              strokeColor: '#0091ea'
-            })
-            polygons.push(polygon);
-          }
-        }
-        map.add(polygons)
-      })
-      return map
+    // 添加丽江背景
+    var opts = {
+      subdistrict: 0,
+      extensions: 'all',
+      level: 'district'
     }
 
-    async function getMarkers() {
-      const {List} = await getAllDevices()
+    var district = new AMap.DistrictSearch(opts)
+    district.search('古城区', function(status, result) {
+      var polygons = []
+      var bounds = result.districtList[0].boundaries;
+      if (bounds) {
+        for (var i = 0, l = bounds.length; i < l; i++) {
+          //生成行政区划polygon
+          var polygon = new AMap.Polygon({
+            strokeWeight: 1,
+            path: bounds[i],
+            fillOpacity: 0.5,
+            fillColor: '#2C4F6B',
+            strokeColor: '#0091ea'
+          })
+          polygons.push(polygon)
+        }
+      }
+      map.add(polygons)
+    })
+    return map
+  }
+
+   
+
+
+    // function renderMap() {
+    //   const markers = getMarkers()
+    //   const map = initMap()
+    //   renderMarkers(map, markers)
+    // }
+
+    // renderMap()
+  
+    componentWillReceiveProps(props) {
+    
+    function getMarkers() {
       function transformGeo(geo) {
         return transform(
           geo,
@@ -79,7 +89,9 @@ class Map extends React.Component {
           GCJ02
         )
       }
-      const markers = List.flat().map(item => (
+      const devices = props.devices
+
+      const markers = devices.map(item => (
         {
           geo: transformGeo([item.Long, item.Lat]),
           title: item.Addr,
@@ -120,28 +132,23 @@ class Map extends React.Component {
         offset: new AMap.Pixel(20, -30)
       })
       infoWindow.open(map, position)
+      infoWindow.on('close', function(e) {
+        props.closeShow()
+      })
     }
-
-
-    async function renderMap() {
-      const markers = await getMarkers()
-      const map = initMap(markers[0]['geo'])
-      renderMarkers(map, markers)
-    }
-
-    renderMap()
+    const markers = getMarkers()
+    renderMarkers(this.map, markers)
   }
-
   render() {
     return (
       <div className="map-container">
-        <div id="map" style={{width: '1272px', height: '617px'}}></div>
+        <div id="map" style={{width: '1840px', height: '870px'}}></div>
       </div>
     )
   }
 }
 
-function Footer({detail, searchDetail, searchList, selectSearch}) {
+function Footer({detail, searchDetail, searchList, selectSearch, show}) {
   const initImages = [
     require('../assets/device01.png'),
     require('../assets/device02.png'),
@@ -162,7 +169,7 @@ function Footer({detail, searchDetail, searchList, selectSearch}) {
     setValue('')
   }
   return (
-    <footer className="footer">
+    <footer className="footer" style={{display: show ? 'block': 'none'}}>
       <div className="left">
         <div className="top">
           <h5 className="title">设备信息</h5>
@@ -226,6 +233,7 @@ function Footer({detail, searchDetail, searchList, selectSearch}) {
 function Main() {
   const [detail, setDetail] = useState({})
   const [searchList, setSearchList] = useState([])
+  const [show, setShow]  = useState(false)
 
   function praseDevice(device) {
     const {No, Play, Vol, IsConn, Addr, Enable, GrpName} = device
@@ -234,18 +242,25 @@ function Main() {
       address: Addr.slice(5),
       content: Play.slice(0, -4),
       status: !IsConn
-                ? '未连接'
-                : Enable
-                  ? '已启用'
-                  : '未启用',
+                ? '掉线'
+                : Play
+                  ? '播放'
+                  : Enable
+                    ? '正常'
+                    :  '未启用',
       volumn: Vol,
       grpName: GrpName
     }
   }
 
-  async function detailHandler(e, id){
+  async function detailHandler(e, id) {
     const device = await getDevice(id)
     setDetail(praseDevice(device))
+    setShow(true)
+  }
+  
+  function closeShow() {
+    setShow(false)
   }
 
   async function searchDetail(event) {
@@ -261,8 +276,15 @@ function Main() {
 
   return (
     <main className='main-main'>
-      <Map getDetail={detailHandler} />
-      <Footer detail={detail} searchList={searchList} searchDetail={searchDetail} selectSearch={selectSearch} />
+      <ToggleConsumer>
+        {
+          ({devices}) =>  (
+            <Map getDetail={detailHandler} closeShow={closeShow} devices={devices}/>
+          )
+        }
+      </ToggleConsumer>
+
+      <Footer detail={detail} searchList={searchList} searchDetail={searchDetail} selectSearch={selectSearch} show={show}/>
     </main>
   )
 }

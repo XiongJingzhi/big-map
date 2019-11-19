@@ -1,5 +1,6 @@
 import React, { createContext } from 'react'
-import { getDevsCount } from '../api/info'
+import { getDevsCount, getAllDevices } from '../api/info'
+import  { groupBy } from 'lodash'
 
 const getCount = async () => {
   const res = await getDevsCount()
@@ -9,14 +10,37 @@ const getCount = async () => {
       value: res.AllCount
     },
     {
-      title: '景区人数预估',
+      title: '广播受众范围',
       value: 964 + Number((Math.random() * 100000).toFixed(0))
     },
     {
-      title: '故障率',
-      value: (res.DisCount / res.AllCount * 100).toFixed(2) + '%'
+      title: '今日播放时长',
+      value: '0'
     }
   ])
+}
+
+const getDevices = async () =>  {
+  const {List} = await getAllDevices()
+  const all =  List.flat()
+  const parts = groupBy(all, 'GrpName')
+  const keys = Object.keys(parts).map(item =>  item.slice(0, 3))
+  const res = {}
+  for (const key in parts) {
+    const element = parts[key]
+    const name = key.slice(0, 3)
+    if (keys.includes(name)) {
+      res[name] ? res[name].push(...element) : res[name] = element
+    }
+  }
+  return {
+    devices: all,
+    parts: Object.keys(res).map(item => ({
+      title: item,
+      value: res[item].length,
+      status: (res[item].map(i =>  i.IsConn).length / res[item].length) > 0.7 ? '正常' : '异常'
+    }))
+  }
 }
 
 // 1. 使用 createContext 创建上下文
@@ -30,15 +54,16 @@ export class ToggleProvider extends React.Component {
         value: 0
       },
       {
-        title: '景区人数预估',
+        title: '广播受众范围',
         value: '108370'
       },
       {
-        title: '故障率',
+        title: '今日播放时长',
         value: '0'
       }
     ],
-    allDevices: []
+    parts: [],
+    devices: []
   }
   componentDidMount() {
     this.init()
@@ -49,9 +74,11 @@ export class ToggleProvider extends React.Component {
   }
 
   init = async () => {
-    let [counts] = await Promise.all([getCount()])
+    let [counts, devices] = await Promise.all([getCount(), getDevices()])
     this.setState({
-      counts: counts
+      counts: counts,
+      parts: devices.parts,
+      devices: devices.devices
     })
   }
 

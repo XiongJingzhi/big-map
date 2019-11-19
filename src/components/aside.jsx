@@ -53,43 +53,9 @@ function Count() {
 }
 
 function Congestion() {
-  const initCounts = [
-    {
-      title: '四方街',
-      value: '16',
-      status: '正常'
-    },
-    {
-      title: '酒吧街',
-      value: '40',
-      status: '正常'
-    },
-    {
-      title: '东大街',
-      value: '16',
-      status: '正常'
-    },
-    {
-      title: '现文街',
-      value: '26',
-      status: '正常'
-    },
-    {
-      title: '七一街',
-      value: '16',
-      status: '正常'
-    },
-    {
-      title: '五一街',
-      value: '16',
-      status: '正常'
-    }
-  ]
-  const [counts, setCounts] = useState(initCounts)
-
   return (
     <section className="congestion">
-      <h5>景区拥堵情况</h5>
+      <h5>古城应急广播分布</h5>
       <table>
         <thead>
           <tr>
@@ -99,15 +65,19 @@ function Congestion() {
           </tr>
         </thead>
         <tbody>
+        <ToggleConsumer>
           {
-            counts.map((item, i) => (
-              <tr key={'notice' + i}>
-                <td>{item.title}</td>
-                <td>{item.value + '台'}</td>
-                <td>{item.status}</td>
-              </tr>
-            ))
+            ({parts}) => (
+              parts.map((item, i) => (
+                <tr key={'parts' + i}>
+                  <td>{item.title}</td>
+                  <td>{item.value + '台'}</td>
+                  <td>{item.status}</td>
+                </tr>
+              ))
+            )
           }
+        </ToggleConsumer>
         </tbody>
       </table>
     </section>
@@ -116,20 +86,12 @@ function Congestion() {
 
 function AsideSection() {
   return (
-    <aside style={styles.aside} className="aside">
+    <aside className="aside">
       <Notice />
       <Count />
       <Congestion />
     </aside>
   )
-}
-
-const styles = {
-  aside: {
-    float: 'left',
-    marginLeft: 30,
-    width: 530
-  }
 }
 
 
