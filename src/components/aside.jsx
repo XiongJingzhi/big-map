@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { ToggleConsumer } from './content'
 import './aside.css'
 
 function Notice() {
-  const initNotices = [
+  const notices = [
     {
       title: '播报',
       status: '正在播放'
@@ -17,7 +17,6 @@ function Notice() {
       status: '播放完毕'
     },
   ]
-  const [notices, setNotices] = useState(initNotices)
   return (
     <section className="notices">
       <h5>今日播放</h5>
